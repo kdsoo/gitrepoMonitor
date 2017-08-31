@@ -10,7 +10,7 @@ var untrackedrepo = [];
 var notrepo = [];
 
 function scanRoot(path, cb) {
-	console.log("Start scanning repository root directory: " + root);
+	console.log("Start scanning repository root directory: " + path);
 	fs.readdir(path, function(err, ret) {
 		if (err) {
 			cb(err, null);
@@ -20,8 +20,8 @@ function scanRoot(path, cb) {
 	});
 }
 
-function isGitRepo(path, cb) {
-	var repo = root + "/" + path;
+function isGitRepo(path, repo, cb) {
+	var repo = path + "/" + repo;
 	fs.readdir(repo, function(err, ret) {
 		if (err) {
 			cb(null, false);
@@ -34,8 +34,8 @@ function isGitRepo(path, cb) {
 	});
 }
 
-function isGitrepoSync(path) {
-	var repo = root + "/" + path;
+function isGitrepoSync(path, repo) {
+	var repo = path + "/" + repo;
 	var isrepo = false;
 	if (fs.statSync(repo).isFile())
 		return isrepo;
@@ -64,8 +64,8 @@ function parseGit(statusline) {
 }
 
 // returns {modified: val, untracked: val}
-function checkGitRepo(path, cb) {
-	var repo = root + "/" + path;
+function checkGitRepo(path, repo, cb) {
+	var repo = path + "/" + repo;
 	var gitdir = "--git-dir=" + repo + "/.git";
 	var worktree = "--work-tree=" + repo;
 	var check = spawn('git', [gitdir, worktree, "status", "-s"]);
@@ -93,26 +93,26 @@ function showStatus() {
 	console.log("[" + notrepo.length + "] not repo: " + notrepo);
 }
 
-function checkGitRepoList(arr, cb) {
+function checkGitRepoList(path, arr, cb) {
 	var checktask = [];
 	var promises = [];
 	for (var i = 0; i < arr.length; i++) {
 		(function(i) {
 			var repo = arr[i];
 			checktask[i] = new Promise(function(resolve, reject) {
-				isGitRepo(repo, function(err, ret) {
+				isGitRepo(path, repo, function(err, ret) {
 					if (err) {
 						//console.error(err);
 					} else {
 						if (ret == true) {
-							checkGitRepo(repo, function(ret) {
+							checkGitRepo(path, repo, function(ret) {
 								if (ret.modified > 0) dirtyrepo.push(repo);
 								if (ret.untracked > 0) untrackedrepo.push(repo);
 								if (!ret.modified && !ret.untracked) cleanrepo.push(repo);
 								resolve();
 							});
 						} else {
-							if (fs.statSync(root + "/" + repo).isDirectory())
+							if (fs.statSync(path + "/" + repo).isDirectory())
 								notrepo.push(repo);
 							resolve();
 						}
@@ -129,9 +129,14 @@ function checkGitRepoList(arr, cb) {
 	});
 }
 
-scanRoot(root, function(err, ret) {
-	checkGitRepoList(ret, function(ret) {
-		showStatus();
+function checkStatus(cb) {
+	scanRoot(root, function(err, ret) {
+		var path = root;
+		checkGitRepoList(path, ret, function(ret) {
+			showStatus();
+			cb(ret);
+		});
 	});
-});
 
+}
+module.exports.checkStatus = checkStatus;
