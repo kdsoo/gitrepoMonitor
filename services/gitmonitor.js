@@ -10,6 +10,18 @@ var dirtyrepo = [];
 var untrackedrepo = [];
 var notrepo = [];
 
+function initRepositories() {
+	cleanrepo = [];
+	dirtyrepo = [];
+	untrackedrepo = [];
+	notrepo = [];
+	console.log("Scanned repositories cleared");
+}
+
+setInterval(function() {
+	initRepositories();
+}, 10 * 60 * 1000);	// empty scanned arrays every 10 min
+
 function scanRoot(path, cb) {
 	console.log("Start scanning repository root directory: " + path);
 	fs.readdir(path, function(err, ret) {
