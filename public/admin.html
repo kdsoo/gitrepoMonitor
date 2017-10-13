@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<link rel="stylesheet" href="stylesheets/style.css">
+		<link rel="stylesheet" href="stylesheets/style.css">
+		<script src="javascripts/socket.io.slim.js"></script>
+	</head>
+	<body>
+		<!-- application comes in container -->
+		<div class="container">
+			<div class=row>
+				<div id="category">
+					<div class="col-xs-2" style="padding: 5px 5px 5px 5px">
+						<button id ="dirty" class="btn-default" onclick="location.href='?cat=dirty'">DIRTY</button>
+						<button id ="clean" class="btn-default" onclick="location.href='?cat=clean'">CLEAN</button>
+						<button id ="untracked" class="btn-default" onclick="location.href='?cat=untracked'">UNTRACKED</button>
+					</div>
+				</div>
+			</div>
+		</div>	<!-- container -->
+
+		<div class="container" id="main">
+			<div id="repolist"></div>
+		</div>	<!-- container -->
+
+		<script src="javascripts/admin.js"></script>
+	</body>
+</html>
+

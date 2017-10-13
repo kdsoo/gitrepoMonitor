@@ -1,7 +1,8 @@
 var fs = require('fs');
 var path = require('path');
 var readline = require('readline');
-var root = path.join(__dirname, "..", "..");
+var config = require('config');
+var root = config.get("rootpath") || path.join(__dirname, "..", "..");
 var spawn = require('child_process').spawn;
 
 var cleanrepo = [];
@@ -15,6 +16,7 @@ function scanRoot(path, cb) {
 		if (err) {
 			cb(err, null);
 		} else {
+			console.log(ret);
 			cb(null, ret);
 		}
 	});
@@ -93,6 +95,10 @@ function showStatus() {
 	console.log("[" + notrepo.length + "] not repo: " + notrepo);
 }
 
+function addToArr(arr, name) {
+	if (arr.indexOf(name) < 0) arr.push(name);
+}
+
 function checkGitRepoList(path, arr, cb) {
 	var checktask = [];
 	var promises = [];
@@ -106,14 +112,15 @@ function checkGitRepoList(path, arr, cb) {
 					} else {
 						if (ret == true) {
 							checkGitRepo(path, repo, function(ret) {
-								if (ret.modified > 0) dirtyrepo.push(repo);
-								if (ret.untracked > 0) untrackedrepo.push(repo);
-								if (!ret.modified && !ret.untracked) cleanrepo.push(repo);
+								if (ret.modified > 0) addToArr(dirtyrepo, repo);
+								if (ret.untracked > 0) addToArr(untrackedrepo, repo);
+								if (!ret.modified && !ret.untracked) addToArr(cleanrepo, repo);
 								resolve();
 							});
 						} else {
-							if (fs.statSync(path + "/" + repo).isDirectory())
-								notrepo.push(repo);
+							if (fs.statSync(path + "/" + repo).isDirectory()) {
+								addToArr(notrepo, repo);
+							}
 							resolve();
 						}
 					}
@@ -128,6 +135,19 @@ function checkGitRepoList(path, arr, cb) {
 		console.error(err);
 	});
 }
+
+function getTimestamp(path, cb) {
+	var repo = root + "/" + path;
+	fs.stat(repo, function(err, ret) {
+		if (err) {
+			console.error(err);
+			cb(err, null);
+		} else {
+			cb(null, ret);
+		}
+	});
+}
+module.exports.getTimestamp = getTimestamp;
 
 function checkStatus(cb) {
 	scanRoot(root, function(err, ret) {
