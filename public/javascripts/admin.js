@@ -2,6 +2,7 @@ var searchParams = new URLSearchParams(window.location.search);
 
 $(document).ready(function(){
 	var category = searchParams.get("cat");
+	if (category == null) category = "dirty";
 	if (category == "dirty") {
 		getRepos("dirtyrepo");
 	} else if (category == "clean") {
